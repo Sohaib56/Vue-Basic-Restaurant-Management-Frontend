@@ -25,40 +25,18 @@
       </nav>
 </template>
 <script>
-import axios from 'axios';
 
 export default {
   name:"HeaderNav",
 
   methods: {
+    
     async handleLogout() {
-      try {
-        const authToken = localStorage.getItem('authToken');
-        
-        if (!authToken) {
-          console.error('Authentication token not found.');
-          return;
-        }
-
-        const response = await axios.post('http://127.0.0.1:8000/api/logout', {}, {
-          headers: {
-            Authorization: `Bearer ${authToken}`,
-          },
-        });
-
-        console.log('Logout successful', response.data);
-
-        localStorage.removeItem('authToken');
-        localStorage.removeItem('user-info');
-
-        this.$router.push({name:'Login'})
-        
-        
-      } catch (error) {
-       
-        console.error('Logout failed', error.response.data);
-      }
+      await this.$store.dispatch('logout');
+      this.$router.push({ name: 'Login' });
+      localStorage.removeItem('vuex');
     },
+    
   },
 };
 </script>

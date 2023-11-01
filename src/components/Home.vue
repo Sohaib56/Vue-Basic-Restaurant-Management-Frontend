@@ -40,7 +40,8 @@
    
     computed: {
       ...mapState({
-        userName: state => state.register.name
+        userName: state => state.register.name,
+        token: state=>state.register.authToken,
       }),
       restaurants() {
 
@@ -61,9 +62,9 @@
       }
     },
     mounted() {
-      this.loadData()
-      let user=localStorage.getItem('user-info')
-    if(!user){
+         this.loadData()
+      // let user=this.$state.authToken
+    if(!this.token){
       this.$router.push({ name: 'SignUp' });
     }
     },

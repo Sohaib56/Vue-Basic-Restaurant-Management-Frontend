@@ -15,50 +15,7 @@
 // import axios from 'axios'
 export default {
     name:'SignUp',
-//     data(){
-//         return{
-//             name:'',
-//             email:'',
-//             password:'',
-//         }
-//     },
-//     mounted() {
-//             console.log('mount')
-//       let user=localStorage.getItem('user-info');
-//       if(user){
-//         this.$router.push({name:'Home'});
-//       }
-//    },
-//     methods: {
-        
-//     async handleRegister() {
-//         console.warn("Register", this.name, this.email, this.password, this.password_confirmation);
-//         try {
-//             let response = await axios.post("http://127.0.0.1:8000/api/register", {
-//                 name: this.name,
-//                 email: this.email,
-//                 password: this.password,
-//             });
 
-//             console.warn(response);
-
-//             if (response.status === 201) {
-//                 alert("SignUp Done");
-//                 this.$router.push({name:'Home'});
-//             } else {
-//                 console.error("Registration failed with status: " + response.status);
-//             }
-//             localStorage.setItem("user-info",JSON.stringify(response.data))
-
-//         } catch (error) {
-//             console.error("Error during registration:", error);
-
-//         }
-
-//     },
-  
-
-// }
 computed: {
     name: {
       get() {

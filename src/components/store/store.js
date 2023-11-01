@@ -1,14 +1,17 @@
 import {createStore} from'vuex';
+import createPersistedState from "vuex-persistedstate";
 import axios from 'axios';
 
 const registerModule={
+  // plugins: [createPersistedState()],
 
 state : {
   name: '',
   email: '',
   password: '',
   user: null,
-  error:''
+  error:'',
+  authToken:'',
 },
 
 mutations : {
@@ -23,7 +26,13 @@ mutations : {
   },
   SET_USER(state, user) {
     state.user = user;
-  }
+  },
+  SET_Token(state, authToken) {
+    state.authToken = authToken;
+  },
+  SET_Error(state, error) {
+    state.error = error;
+  },
 },
 actions : {
   async register({ commit, state }) {
@@ -31,48 +40,92 @@ actions : {
       let response = await axios.post("http://127.0.0.1:8000/api/register", {
         name: state.name,
         email: state.email,
-        password: state.password
+        password: state.password,
       });
+      
 
       if (response.status === 201) {
+
+        console.log(response.data.token);
         alert("SignUp Done");
         commit('SET_USER', response.data);
-        localStorage.setItem("user-info", JSON.stringify(response.data));
-        localStorage.setItem('authToken', response.data.token);
+        commit('SET_Token',response.data.token);
+       
       } else {
         console.error("Registration failed with status: " + response.status);
       }
     } catch (error) {
       console.error("Error during registration:", error);
+      commit('SET_error',this.response.status)
     }
   },
-  async login({ commit }, { email, password }) {
+  async login({ commit,state }) {
     try {
       const response = await axios.post('http://127.0.0.1:8000/api/login', {
-        email: email,
-        password: password,
+        email: state.email,
+        password: state.password,
       });
 
       console.log('Login successful', response.data);
       commit('SET_USER', response.data);
-      localStorage.setItem('user-info', JSON.stringify(response.data));
-      localStorage.setItem('authToken', response.data.token);
+      commit('SET_Token',response.data.token);
+      console.log(state.user,state.authToken);
+      
 
-      return response.data; // Return the response for further handling in the component
+      return response.data;
     } catch (error) {
       console.error('Login failed', error);
-      throw error; // This line can be omitted, the error will be caught in the component
+      throw error;
     }
   },
+    async logout({ commit,state }) {
+      try {
+        const authToken = state.authToken
+
+        if (!authToken) {
+          console.error('Authentication token not found.');
+          return;
+        }
+
+        const response = await axios.post('http://127.0.0.1:8000/api/logout', {}, {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+        });
+
+        console.log('Logout successful', response.data);
+
+       
+        commit('SET_USER', null);
+        this.$router.push({ name: 'Login' });
+
+      } catch (error) {
+        console.error('Logout failed');
+        
+      }
+    },
 },
+
 }
 
 
 const homeModule={
   state: {
     restaurants: [],
+    name:null,
+    address:null,
+    contact_number:null,
   },
   mutations: {
+    setName(state, name) {
+      state.name = name;
+    },
+    setAddress(state, address) {
+      state.address = address;
+    },
+    setContact(state, contact_number) {
+      state.contact_number = contact_number;
+    },
     setRestaurants(state, restaurants) {
       state.restaurants = restaurants;
     },
@@ -82,6 +135,13 @@ const homeModule={
     deleteRestaurant(state, restaurantId) {
       state.restaurants = state.restaurants.filter(restaurant => restaurant.id !== restaurantId);
     },
+    updateRestaurant(state, restId, restaurant ) {
+      const restaurantIndex = state.restaurants.find(restaurant => restaurant.id === restId);
+        state.restaurants[restaurantIndex] = restaurant;
+    },
+   
+  
+    
   },
   actions: {
     async fetchRestaurants({ commit }) {
@@ -101,6 +161,7 @@ const homeModule={
         console.error(error);
       }
     },
+   
     async deleteRestaurant({ commit }, restaurantId) {
       try {
         await axios.delete(`http://127.0.0.1:8000/api/restaurants/${restaurantId}`);
@@ -110,15 +171,23 @@ const homeModule={
         console.error(error);
       }
     },
+    async updateRestaurant({ commit }, { restId, restaurant }) {
+      try {
+        const response = await axios.put(`http://127.0.0.1:8000/api/restaurants/${restId}`, restaurant);
+        if (response.status === 200) {
+          commit('updateRestaurant',  restId, restaurant );
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    },
   },
   }
-
-
-
 
 export default createStore({
     modules:{
         register:registerModule,
         home:homeModule,
     },
-})
+    plugins: [createPersistedState()], 
+  })

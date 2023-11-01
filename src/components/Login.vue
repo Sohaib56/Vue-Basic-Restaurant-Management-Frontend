@@ -5,45 +5,72 @@
     <input v-model="email" type="email" placeholder="Enter Email">
     <input v-model="password" type="password" placeholder="Enter Password">
     <button @click="handleLogin">Submit</button>
-    <div v-if="loginError" class="error-message text-danger">{{ loginError }}</div>
+    <!-- <div v-if="loginError" class="error-message text-danger">{{ loginError }}</div> -->
     <router-link to="/sign-up">Sign Up</router-link>
   </div>
 </template>
 <script>
 // import axios from 'axios'
-import { mapActions } from 'vuex';
+// import { mapActions } from 'vuex';
 
 export default {
     name:'LogIn',
-    data(){
-        return{
+    // data(){
+    //     return{
 
-            email:'',
-            password:'',
-            loginError:'',
-        }
-    },
-    methods: {
-        ...mapActions(['login']),
-        async handleLogin() {
-      try {
-        const response = await this.login({
-          email: this.email,
-          password: this.password,
-        });
-
-        console.log('Login successful', response);
-        this.$router.push({ name: 'Home' });
-      } catch (error) {
-        if (error.response && error.response.status === 401) {
-          this.loginError = 'Invalid credentials. Please try again.';
-        } else {
-          console.error('Login failed', error);
-        }
+    //         email:'',
+    //         password:'',
+    //         loginError:'',
+    //     }
+    // },
+    computed:{
+      email: {
+      get() {
+        return this.$store.state.register.email;
+      },
+      set(value) {
+        this.$store.commit('SET_EMAIL', value);
       }
     },
+    password: {
+      get() {
+        return this.$store.state.register.password;
+      },
+      set(value) {
+        this.$store.commit('SET_PASSWORD', value);
+      }
+    }
+    },
+    methods: {
+    //     ...mapActions(['login']),
+    //     async handleLogin() {
+    //   try {
+    //     const response = await this.login({
+    //       email: this.email,
+    //       password: this.password,
+    //     });
 
-
+    //     console.log('Login successful', response);
+    //     this.$router.push({ name: 'Home' });
+    //   } catch (error) {
+    //     if (error.response && error.response.status === 401) {
+    //       this.loginError = 'Invalid credentials. Please try again.';
+    //     } else {
+    //       console.error('Login failed', error);
+    //     }
+    //   }
+    // },
+    async handleLogin() {
+      await this.$store.dispatch('login');
+      this.$router.push({ name: 'Home' });
+    },
+    
+  },
+  mounted() {
+  let user=localStorage.getItem('user-info')
+  if(user){
+    this.$router.push({ name: 'Home' });
+  }
 },
 };
 </script>
